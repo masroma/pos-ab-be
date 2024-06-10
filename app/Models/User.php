@@ -40,6 +40,16 @@ class User extends Authenticatable implements JWTSubject
     ];
 
     /**
+     * Get the user that owns the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function general()
+    {
+        return $this->belongsTo(General::class, 'id', 'id_user');
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -57,6 +67,16 @@ class User extends Authenticatable implements JWTSubject
      *
      * @return void
      */
+    public function ModelHasRole()
+    {
+        return $this->HasMany(ModelHasRole::class, 'model_id', 'id');
+    }
+ 
+    public function ModelHasRoles()
+    {
+        return $this->hasOne(ModelHasRole::class, 'model_id', 'id');
+    }
+    
     public function getPermissionArray()
     {
         return $this->getAllPermissions()->mapWithKeys(function($pr){
@@ -65,12 +85,7 @@ class User extends Authenticatable implements JWTSubject
    
     }
 
-    protected function name(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => strtoupper($value)
-        );
-    }
+   
 
     public function getJWTIdentifier()
     {

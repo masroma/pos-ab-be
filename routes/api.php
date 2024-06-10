@@ -11,7 +11,11 @@ Route::prefix('admin')->group(function () {
 
     //group route with middleware "auth:api_admin"
     Route::group(['middleware' => 'auth:api_admin'], function() {
+        Route::get('dashboard', App\Http\Controllers\Api\DashboardController::class)->name('dashboard');
 
+        Route::post('/updateprofile', [App\Http\Controllers\Api\LoginController::class, 'updateProfile', ['as' => 'admin']]);
+
+        Route::post('/updatepassword', [App\Http\Controllers\Api\LoginController::class, 'updatePassword', ['as' => 'admin']]);
         //data user
         Route::get('/user', [App\Http\Controllers\Api\LoginController::class, 'getUser', ['as' => 'admin']]);
 
@@ -20,6 +24,37 @@ Route::prefix('admin')->group(function () {
 
         //logout
         Route::post('/logout', [App\Http\Controllers\Api\LoginController::class, 'logout', ['as' => 'admin']]);
+
+        Route::get('/permissions', \App\Http\Controllers\Api\PermissionController::class)->name('permissions.index');
+
+        Route::resource('/roles', \App\Http\Controllers\Apps\RoleController::class, ['as' => 'apps'])
+        ->middleware('permission:roles.index|roles.create|roles.edit|roles.delete');
+
+        Route::resource('/users', \App\Http\Controllers\Apps\UserController::class, ['as' => 'apps'])
+        ->middleware('permission:users.index|users.create|users.edit|users.delete');
+
+        //route resource categories
+        Route::resource('/categories', \App\Http\Controllers\Apps\CategoryController::class, ['as' => 'apps'])->middleware('permission:categories.index|categories.create|categories.edit|categories.delete');  
+
+        Route::resource('/products', \App\Http\Controllers\Apps\ProductController::class, ['as' => 'apps'])
+        ->middleware('permission:products.index|products.create|products.edit|products.delete');
+
+        Route::get('/transactions', [\App\Http\Controllers\Apps\TransactionController::class, 'index'])->name('apps.transactions.index');
+
+        //route transaction searchProduct
+        Route::post('/transactions/searchProduct', [\App\Http\Controllers\Apps\TransactionController::class, 'searchProduct'])->name('apps.transactions.searchProduct');
+        
+        //route transaction addToCart
+        Route::post('/transactions/addToCart', [\App\Http\Controllers\Apps\TransactionController::class, 'addToCart'])->name('apps.transactions.addToCart');
+
+        //route transaction destroyCart
+        Route::post('/transactions/destroyCart', [\App\Http\Controllers\Apps\TransactionController::class, 'destroyCart'])->name('apps.transactions.destroyCart');
+
+        //route transaction store
+        Route::post('/transactions/store', [\App\Http\Controllers\Apps\TransactionController::class, 'store'])->name('apps.transactions.store');
+
+        //route transaction print
+        Route::get('/transactions/print', [\App\Http\Controllers\Apps\TransactionController::class, 'print'])->name('apps.transactions.print');
     
     });
 
