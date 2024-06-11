@@ -13,9 +13,14 @@ class RoleController extends Controller
     public function index()
     {
         //get roles
+        if(request()->jumlahperpage){
+            $perPage = request()->jumlahperpage;
+        }else{
+            $perPage =10;
+        }
         $roles = Role::when(request()->q, function($roles) {
             $roles = $roles->where('name', 'like', '%'. request()->q . '%');
-        })->with('permissions')->latest()->paginate(5);
+        })->with('permissions')->latest()->paginate($perPage);
 
         if($roles){
             return response()->json([
@@ -62,13 +67,15 @@ class RoleController extends Controller
         /**
          * Validate request
          */
+        
+      
         $request->validate([
             'name'          => 'required',
             'permissions'   => 'required',
         ]);
 
         try {
-            $role = Role::create(['name' => $request->name]);
+            $role = Role::create(['name' => $request->name, 'guard_name' => 'web']);
 
             //assign permissions to role
             $role->givePermissionTo($request->permissions);
@@ -168,6 +175,7 @@ class RoleController extends Controller
         try {
             // Find the role by ID
             $role = Role::findOrFail($id);
+          
     
             // Delete the role
             $role->delete();
